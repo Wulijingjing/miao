@@ -13,8 +13,9 @@
 						特色 <i class="iconfont icon-lower-triangle"></i>
 					</div>
 				</div>
+				<ClList></ClList>
 			</div>
-			<ClList></ClList>
+
 		<TabBar></TabBar>
 	</div>
 </template>
@@ -35,4 +36,6 @@
 
 <style scoped>
 	#content .cinema_menu{ width: 100%; height: 45px; border-bottom:1px solid #e6e6e6; display: flex; justify-content:space-around; align-items:center; background:white;}
+	/*#content .cinema_menu{ width: 100%; height: 45px; border-bottom:1px solid #e6e6e6; display: flex; justify-content:space-around; align-items:center; background:white;}*/
+
 </style>
