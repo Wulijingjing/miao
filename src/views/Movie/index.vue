@@ -19,7 +19,7 @@
 		<div id="content">
 			<div class="movie_menu">
 				<router-link tag='div' to="/movie/city" class="city_name">
-					<span>大连</span><i class="iconfont icon-lower-triangle"></i>
+					<span>{{$store.state.city.nm}}</span><i class="iconfont icon-lower-triangle"></i>
 				</router-link>
 				<div class="hot_swtich">
 					<router-link tag="div" to="/movie/nowplaying" class="hot_item	">正在热映</router-link>
@@ -37,21 +37,45 @@
 
 <!--		</div>-->
 		<TabBar></TabBar>
+
 	</div>
 </template>
 
 <script>
 	import Header from '@/components/Header'
 	import  TabBar from '@/components/TabBar'
-	import City from '@/components/City'
-	import NowPlaying from '@/components/NowPlaying'
+	import { messageBox } from "@/components/JS";
+
 	export default {
 		name: 'Movie',
 		components: {
 			Header,
 			TabBar,
-			City,
-			NowPlaying
+		},
+		mounted() {
+			setTimeout(()=>{
+				this.axios.get('/api/getLocation').then((res)=>{
+					var msg = res.data.msg;
+					if(msg === 'ok'){
+						var nm = res.data.data.nm;
+						var id = res.data.data.id;
+						if(this.$store.state.city.id === id.toString()){return;};//要注意类型，此处store中是字符，id是数字
+						messageBox({
+							title: '定位',
+							content: nm,
+							cancel: '取消',
+							ok: '切换城市',
+							//handlecancel 是默认的 不用更改，所以不做设置
+							handleOk(){
+								window.localStorage.setItem('nowNm', nm);
+								window.localStorage.setItem('nowId', id);
+								window.location.reload();
+							}
+						})
+					}
+				})
+			},1500);
+
 		}
 	}
 </script>

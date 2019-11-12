@@ -1,26 +1,36 @@
 <template>
 <div class="city_body">
-    <div class="city_list">
-       <div class="city_hot">
-           <h2>热门城市</h2>
-           <ul class="clearfix">
-               <li v-for="item in hotList" :key="item.id">{{item.nm}}</li>
-           </ul>
-       </div>
-        <div class="city_sort" ref="city_sort">
-            <div v-for="item in cityList" :key="item.index">
-                <h2>{{item.index}}</h2>
-                <ul>
-                    <li v-for="itemList in item.list" :key="itemList.id">{{itemList.nm}}</li>
-                </ul>
-            </div>
+
+        <loading v-if="isLoading"></loading>
+        <div v-else class="city_list">
+
+            <Scroller ref="city_List">
+                <div>
+                    <div class="city_hot">
+                        <h2>热门城市</h2>
+                        <ul class="clearfix">
+                            <li v-for="item in hotList" :key="item.id" @tap="handleToCity(item.nm, item.id)">{{item.nm}}</li>
+                        </ul>
+                    </div>
+                    <div class="city_sort" ref="city_sort">
+                        <div v-for="item in cityList" :key="item.index">
+                            <h2>{{item.index}}</h2>
+                            <ul>
+                                <li v-for="itemList in item.list" :key="itemList.id" @tap="handleToCity(itemList.nm, itemList.id)">{{itemList.nm}}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </Scroller>
+
         </div>
-    </div>
+
     <div class="city_index">
         <ul>
             <li v-for="(item,index) in cityList" :key="item.index" @touchstart="handlerToIndex(index)">{{item.index}}</li>
-<!--            @touchstart 移动端触摸事件
-@touchstart="handleToIndex(index) 中的index是每个citylist中item的下标-->
+            <!--            @touchstart 移动端触摸事件
+            @touchstart="handleToIndex(index) 中的index是每个citylist中item的下标-->
         </ul>
     </div>
 
@@ -33,23 +43,38 @@
         data(){
             return{
                 cityList: [],
-                hotList: []
+                hotList: [],
+                isLoading: true
             }
         },
         mounted() {
-            this.axios.get('/api/citylist').then((res) => {
-               // console.log(res);
-                var msg = res.data.msg;
 
-                if(msg === 'ok'){
-                    let cities = res.data.data.cities;
-                    // 数据格式[{index: 'A', list: [{nm: 'acheng',id:12}]}]
-                    //结构赋值
-                    var { cityList, hotList} = this.formatCityList(cities);
-                    this.cityList = cityList;
-                    this.hotList = hotList;
-                }
-            });
+           var cityList = window.localStorage.getItem('cityList');
+           var hotList = window.localStorage.getItem('hotList');
+           if(cityList && hotList){
+               this.cityList = JSON.parse(cityList);
+               this.hotList = JSON.parse(hotList);
+               this.isLoading = false;
+
+           }else {
+               this.axios.get('/api/citylist').then((res) => {
+                   // console.log(res);
+                   var msg = res.data.msg;
+
+                   if(msg === 'ok'){
+                       this.isLoading = false;
+                       let cities = res.data.data.cities;
+                       // 数据格式[{index: 'A', list: [{nm: 'acheng',id:12}]}]
+                       //结构赋值
+                       var { cityList, hotList} = this.formatCityList(cities);
+                       this.cityList = cityList;
+                       this.hotList = hotList;
+                       //进行本地存贮
+                       window.localStorage.setItem('cityList', JSON.stringify(cityList));
+                       window.localStorage.setItem('hotList', JSON.stringify(hotList));
+                   }
+               });
+           }
         },
         methods: {
             formatCityList(cities){
@@ -108,7 +133,17 @@
             handlerToIndex(index){
                 //先在city——sort中添加ref=‘city——sort’属性
                 var h2 = this.$refs.city_sort.getElementsByTagName('h2');
-                this.$refs.city_sort.parentNode.scrollTop = h2[index].offsetTop;
+                // this.$refs.city_sort.parentNode.scrollTop = h2[index].offsetTop;
+                this.$refs.city_List.toScrollTop(-h2[index].offsetTop);//因为向上滚动，所以为负值
+            },
+            handleToCity(nm, id){
+                this.$store.commit('city/CITY_INFO',{ nm, id});
+                //利用本地存贮，来保证刷新后不会重新定位到默认的城市
+                //下面是存储代码，获取的还需要在状态管理代码中进行修改
+                window.localStorage.setItem('nowNm', nm);
+                window.localStorage.setItem('nowId', id);
+                //点击城市就自动跳转到movie
+                this.$router.push('/movie/nowplaying');
             }
 
 
