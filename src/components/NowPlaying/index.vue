@@ -24,8 +24,8 @@
                 这时候用vue的过滤功能，考虑到会经常用，所以写在main.js中
                 -->
                 <div class="pic_show" @tap="handlerToDetial"><img :src="item.img | setWH('128.180')" alt="没找到图片"></div>
-                <div class="info_list">
-                    <h2>{{item.nm}}<img v-if="item.version" src="@/assets/maxs.png" alt=""></h2>
+                <div class="info_list" >
+                    <h2 @tap="handlerToDetial">{{item.nm}}<img v-if="item.version" src="@/assets/maxs.png" alt=""></h2>
                     <p>观众评<span class="grade">{{ item.sc }}</span></p>
                     <p>主演：{{ item.star }}</p>
                     <p>{{item.showInfo}}</p>
@@ -105,8 +105,8 @@
             })
         },
         methods: {
-            handlerToDetial(){
-                console.log('aa')
+            handlerToDetial(movieId){
+                this.$router.push('/movie/detail/1/' + movieId);
             },
             handlerToScroll(pos){
                 if(pos.y > 30){
@@ -114,7 +114,7 @@
                 }
             },
             handlerToTouchEnd(pos){
-                console.log('aa')
+
                 if(pos.y > 30 ){
                     //模拟刷新成功数据，此处更改了城市的id，并且设置了延时时间
 
